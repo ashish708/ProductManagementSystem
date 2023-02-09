@@ -13,10 +13,14 @@ public interface ProductService {
 
 	public Object getAllProduct();
 
-	public Object getAllCategory();
-
 	public Object getProductById(Long id);
 
 	public Object updateProduct(ProductDto productDto);
+
+	public Object getCategoryDetails(String name);
+
+	public Object getSearchResults(String allCategory);
+
+	public  Object getspecificProduct(String specificProduct);
 
 }

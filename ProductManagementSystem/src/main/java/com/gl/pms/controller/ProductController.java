@@ -1,7 +1,5 @@
 package com.gl.pms.controller;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gl.pms.dto.ProductDto;
-import com.gl.pms.model.Product;
 import com.gl.pms.service.ProductService;
 
 @RestController
@@ -41,12 +38,6 @@ public class ProductController {
 		return new ResponseEntity<Object>(productService.getAllProduct(), HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/getAllCategoryDetails")
-	public ResponseEntity<Object> getAllCategory() {
-		logger.info("Request for getAllUserDetails");
-		return new ResponseEntity<Object>(productService.getAllCategory(), HttpStatus.OK);
-	}
-
 	@DeleteMapping(value = "/deleteById")
 	public ResponseEntity<Object> deleteById(@RequestParam Long id) {
 		logger.info("Request for deleteProductDetails");
@@ -63,6 +54,24 @@ public class ProductController {
 	public ResponseEntity<Object> updateProduct(@RequestBody ProductDto productDto) {
 		logger.info("Request for updateProduct");
 		return new ResponseEntity<Object>(productService.updateProduct(productDto), HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/getCategoryDetails")
+	public ResponseEntity<Object> getCategoryDetails(@RequestParam String name) {
+		logger.info("Request for getCategoryDetails");
+		return new ResponseEntity<Object>(productService.getCategoryDetails(name), HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/search")
+	public ResponseEntity<Object> searchCategory(@RequestParam String allCategory){
+		logger.info("Request for searchCategory");
+		return new ResponseEntity<Object>(productService.getSearchResults(allCategory), HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/specificProduct")
+	public ResponseEntity<Object> getspecificProduct(@RequestParam String specificProduct){
+		logger.info("Request for searchCategory");
+		return new ResponseEntity<Object>(productService.getspecificProduct(specificProduct),HttpStatus.OK);
 	}
 
 }

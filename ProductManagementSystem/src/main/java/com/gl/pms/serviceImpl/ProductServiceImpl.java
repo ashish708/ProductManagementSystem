@@ -106,23 +106,6 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public Object getAllCategory() {
-		try {
-			logger.info("Inside addUser of ProductServiceImpl");
-			List<Category> productFromRepo = categoryRepo.findAll();
-			if (productFromRepo.size() == 0) {
-				throw new ProductException("No Category Found");
-			}
-			return new Response<Object>("Category Fetched Successfully", "1", productFromRepo);
-		} catch (Exception e) {
-			String errorMsg = MessageFormat.format("Exception caught in getAllCategory of ProductServiceImpl : {0}", e);
-			logger.error(errorMsg);
-			e.printStackTrace();
-			throw new ProductException(e.getMessage());
-		}
-	}
-
-	@Override
 	public Object getProductById(Long id) {
 		try {
 			logger.info("Inside addUser of ProductServiceImpl");
@@ -154,33 +137,27 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object updateProduct(ProductDto productDto) {
 
 		try {
 			logger.info("Inside addUser of ProductServiceImpl");
-			Optional<Product> productFromRepo = productRepo.findById(productDto.getId());
-			if (productFromRepo.isEmpty()) {
+			Product productFromRepo = productRepo.findById(productDto.getId()).orElseThrow();
+			if (productFromRepo == null) {
 				throw new ProductException("Product Doesn't exist");
 			}
-			Product product = productFromRepo.get();
-			product.setId(productDto.getId());
-			product.setName(productDto.getName());
-			product.setPrice(productDto.getPrice());
-			product.setDescription(productDto.getDescription());
+			productFromRepo.setId(productDto.getId());
+			productFromRepo.setName(productDto.getName());
+			productFromRepo.setPrice(productDto.getPrice());
+			productFromRepo.setDescription(productDto.getDescription());
 
-			@SuppressWarnings("unused")
-			List<Product> savedProductDetails = (List<Product>) productRepo.save(product);
-			Category category = new Category();
-			category.setId(productDto.getCategory().getId());
+			Product savedProductDetails = productRepo.save(productFromRepo);
+			Category category = categoryRepo.findById(productDto.getCategory().getId()).orElseThrow();
 			category.setName(productDto.getCategory().getName());
-
-//			category.setProducts(savedProductDetails);
 
 			Category category2 = categoryRepo.save(category);
 
-			product.setCategory(category2);
+			productFromRepo.setCategory(category2);
 
 			return new Response<Object>("product Updated", "1");
 		}
@@ -193,6 +170,69 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
+	@Override
+	public Object getCategoryDetails(String name) {
+		try {
+			logger.info("Inside addUser of ProductServiceImpl");
+			Category category = new Category();
+			Product product = productRepo.findByName(name);
+			if (product != null) {
+				category = categoryRepo.findById(product.getCategory().getId()).orElseThrow();
+			} else {
+				throw new ProductException("No Category Found");
+			}
+			return new Response<Object>("Category Fetched Successfully", "1", category);
+		} catch (Exception e) {
+			String errorMsg = MessageFormat.format("Exception caught in getAllCategory of ProductServiceImpl : {0}", e);
+			logger.error(errorMsg);
+			e.printStackTrace();
+			throw new ProductException(e.getMessage());
+		}
+	}
 
+	@Override
+	public Object getSearchResults(String search) {
+
+		try {
+			logger.info("Inside addUser of ProductServiceImpl");
+			// dynamic search products
+			String like = "%" + search + "%";
+			List<Product> product = productRepo.findBySearchName(like);
+			if (!product.isEmpty()) {
+				return new Response<Object>("Search result found", "1", product);
+			} else {
+				throw new ProductException("Product not found");
+			}
+		}
+
+		catch (Exception e) {
+			String errorMsg = MessageFormat.format("Exception caught in addUser of UserDetailsServiceImpl : {0}", e);
+			logger.error(errorMsg);
+			e.printStackTrace();
+			throw new ProductException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Object getspecificProduct(String specificProduct) {
+		try {
+			logger.info("Inside addUser of ProductServiceImpl");
+			Category category = categoryRepo.findByCategoryName(specificProduct);
+			if (category != null) {
+				List<Product> productList = productRepo.findByCategoryId(category.getId());
+				return new Response<Object>("Products found", "1", productList);
+			} else {
+				throw new ProductException("Products not found");
+			}
+
+		}
+
+		catch (Exception e) {
+			String errorMsg = MessageFormat.format("Exception caught in addUser of UserDetailsServiceImpl : {0}", e);
+			logger.error(errorMsg);
+			e.printStackTrace();
+			throw new ProductException(e.getMessage());
+		}
+	}
 
 }
